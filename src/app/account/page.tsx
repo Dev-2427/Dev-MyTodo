@@ -148,12 +148,7 @@ function Account() {
       if (result.data.success) {
         toast.success(result.data.message)
         await signOut({ redirect: false })
-        const checkSession = setInterval(() => {
-        if (!session?.user) { 
-          clearInterval(checkSession)
-          route.replace("/")
-        }
-      }, 50)
+        route.replace("/")
       } else (
         toast.error(result.data.message)
       )
