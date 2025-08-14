@@ -147,8 +147,8 @@ function Account() {
 
       if (result.data.success) {
         toast.success(result.data.message)
-        await signOut({ redirect: false })
-        route.replace("/")
+        await signOut({callbackUrl: "/"})
+    
       } else (
         toast.error(result.data.message)
       )
