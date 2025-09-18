@@ -4,12 +4,14 @@ import Navbar from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { CredentialContext } from "@/context/credentialProvider"
 import { verifyCodeSchema } from "@/schemas/verifyCodeSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import axios from "axios"
 import { Loader2 } from "lucide-react"
+import { signIn } from "next-auth/react"
 import { useParams, useRouter } from "next/navigation"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import z from "zod"
@@ -21,6 +23,8 @@ function verify() {
     const router = useRouter()
 
     const params = useParams<{ username: string }>()
+
+    const credential = useContext(CredentialContext)
 
     const form = useForm<z.infer<typeof verifyCodeSchema>>({
         resolver: zodResolver(verifyCodeSchema),
@@ -36,9 +40,29 @@ function verify() {
 
             const response = await axios.post('/api/verifyCode', { username: params.username, code: data.code })
 
-            toast.success(response.data.message, { duration: 7000 })
+            if (response.data.success) {
+                toast.success(response.data.message, { duration: 7000 })
 
-            router.replace(`/login-with-token?token=${response.data.token}&username=${params.username}`)
+                const result = await signIn('credentials', {
+                    redirect: false,
+                    identifier: params.username,
+                    password: credential.credential
+                })
+
+                if (result?.error) {
+                    setIsSubmitting(false)
+                    toast.warning('Incorrect username or password', { duration: 7000 })
+                }
+
+                if (result?.url) {
+                    toast.success('Signed in successfully', { duration: 5000 })
+                    credential.removeCredential()
+                    router.push("/dashboard")
+
+                }
+            }
+
+            // router.replace(`/login-with-token?token=${response.data.token}&username=${params.username}`)
 
             setIsSubmitting(false)
         } catch (error) {
@@ -50,6 +74,8 @@ function verify() {
             } else {
                 toast.warning("Something went wrong", { duration: 7000 })
             }
+
+            router.push('/login')
         }
     }
 
