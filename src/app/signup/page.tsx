@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useDebounceCallback } from 'usehooks-ts'
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { signIn } from "next-auth/react";
+import { CredentialContext } from "@/context/credentialProvider";
 
 
 
@@ -26,6 +27,8 @@ function signup() {
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const router = useRouter()
+
+    const credential = useContext(CredentialContext)
 
     const debounced = useDebounceCallback(setUsername, 500)
 
@@ -73,7 +76,7 @@ function signup() {
             toast.success(response.data.message, { duration: 7000 })
 
             router.replace(`/verify/${username}`)
-
+            credential.addCredential(data.password)
             setIsSubmitting(false)
         } catch (error) {
             console.log("error on verifying from frontend", error)
