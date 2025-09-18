@@ -13,7 +13,7 @@ if (!JWT_SECRET) {
 export function createLoginToken(userId: string): string {
     const payload: LoginTokenPayload = { sub: userId }
 
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '5m' })
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: '1m' })
 }
 
 export function verifyLoginToken(token: string): LoginTokenPayload {
