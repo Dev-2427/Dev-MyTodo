@@ -5,6 +5,7 @@ import AuthSessionProvider from "@/context/authSessionProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/context/themeProvider";
 import NProgressProvider from "@/context/NProgressProvider";
+import CredentialContextProvider from "@/context/credentialProvider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -56,10 +57,13 @@ export default function RootLayout({
         >
           <AuthSessionProvider>
             <NProgressProvider>
-              <div className="min-h-screen">
-                {children}
+              <CredentialContextProvider>
 
-              </div>
+                <div className="min-h-screen">
+                  {children}
+
+                </div>
+              </CredentialContextProvider>
             </NProgressProvider>
             <Toaster richColors position="top-center" />
           </AuthSessionProvider>
