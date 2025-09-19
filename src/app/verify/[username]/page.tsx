@@ -51,7 +51,8 @@ function verify() {
 
                 if (result?.error) {
                     setIsSubmitting(false)
-                    toast.warning('Incorrect username or password', { duration: 7000 })
+                    toast.warning('Something went wrong, please login', { duration: 7000 })
+                    router.push('/login')
                 }
 
                 if (result?.url) {
@@ -62,7 +63,6 @@ function verify() {
                 }
             }
 
-            // router.replace(`/login-with-token?token=${response.data.token}&username=${params.username}`)
 
             setIsSubmitting(false)
         } catch (error) {
@@ -75,7 +75,6 @@ function verify() {
                 toast.warning("Something went wrong", { duration: 7000 })
             }
 
-            router.push('/login')
         }
     }
 
