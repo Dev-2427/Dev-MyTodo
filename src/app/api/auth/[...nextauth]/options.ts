@@ -1,7 +1,6 @@
 import { dbConnect } from "@/lib/db";
 import { UserModel } from "@/models/userModel";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google"
@@ -34,42 +33,22 @@ export const authOptions: NextAuthOptions = {
                         throw new Error("Please verify your account before login")
                     }
 
-                    const JWT_SECRET = process.env.NEXTAUTH_KEY!
 
-                    try {
-                        const payload = jwt.verify(credentials.password, JWT_SECRET)
-
-                        if (payload?.sub === String(user._id)) {
-                            return {
-                                id: String(user._id),
-                                email: user.email,
-                                username: user.username
-                            }
-                        } else {
-                            throw new Error('Invalid token payload')
-                        }
-                    } catch (error: any) {
-                        if (error.name === 'TokenExpiredError') {
-                            throw new Error('OTP token expired')
-                        }
-
-                        if (!user.password || user.provider === "google") {
-                            throw new Error("This account was created with Google. Please sign in with Google.");
-                        }
-
-                        const correctPassword = await bcrypt.compare(credentials.password, user.password)
-
-                        if (!correctPassword) {
-                            throw new Error("Incorrect password")
-                        }
-
-                        return {
-                            id: String(user._id),
-                            email: user.email,
-                            username: user.username
-                        }
+                    if (!user.password || user.provider === "google") {
+                        throw new Error("This account was created with Google. Please sign in with Google.");
                     }
 
+                    const correctPassword = await bcrypt.compare(credentials.password, user.password)
+
+                    if (!correctPassword) {
+                        throw new Error("Incorrect password")
+                    }
+
+                    return {
+                        id: String(user._id),
+                        email: user.email,
+                        username: user.username
+                    }
                 }
 
                 catch (error) {
@@ -140,7 +119,7 @@ export const authOptions: NextAuthOptions = {
             if (trigger === "update" && session?.username) {
                 token.username = session.username;
             }
-    
+
             const existingUser = await UserModel.findById(token.sub)
             if (!existingUser) {
                 throw new Error('User deleted')
@@ -161,10 +140,6 @@ export const authOptions: NextAuthOptions = {
         signIn: "/sign-in"
     },
     session: {
-        strategy: "jwt",
-          maxAge: 30 * 24 * 60 * 60,
-    },
-     jwt: {
-    maxAge: 30 * 24 * 60 * 60, 
-  },
+        strategy: "jwt"
+    }
 }
