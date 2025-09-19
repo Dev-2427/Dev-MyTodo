@@ -1,6 +1,5 @@
 import { dbConnect } from "@/lib/db";
 import { UserModel } from "@/models/userModel";
-import { createLoginToken } from "@/helpers/jwt";
 
 export async function POST(request: Request) {
     await dbConnect()
@@ -17,7 +16,7 @@ export async function POST(request: Request) {
 
         const decodedUsername = decodeURIComponent(username)
 
-        const user = await UserModel.findOne({ username: decodedUsername }) 
+        const user = await UserModel.findOne({ username: decodedUsername })
 
         if (!user) {
             return Response.json({
@@ -27,19 +26,16 @@ export async function POST(request: Request) {
 
         const validCode = user.verifyCode === code
         const checkExpiryDate = new Date(user.verifyCodeExpiry!) > new Date()
-        
+
         if (validCode && checkExpiryDate) {
 
             user.isVerified = true
 
             await user.save()
 
-            const token = createLoginToken(user._id.toString())
-
             return Response.json({
                 success: true,
                 message: "Account verified successfully",
-                token
             }, { status: 200 })
 
         } else if (!checkExpiryDate) {
