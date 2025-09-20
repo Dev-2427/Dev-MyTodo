@@ -120,10 +120,6 @@ export const authOptions: NextAuthOptions = {
                 token.username = session.username;
             }
 
-            const existingUser = await UserModel.findById(token.sub)
-            if (!existingUser) {
-                throw new Error('User deleted')
-            }
             return token
         },
         async session({ session, token }) {
